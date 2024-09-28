@@ -2,22 +2,20 @@ const express = require('express');
 const userRoutes = require('./routes/userRoutes');
 const photoRoutes = require('./routes/photoRoutes');
 const messageRoutes = require('./routes/messageRoutes');
+const searchRoutes = require('./routes/searchRoutes');
 const middleware = require('./utils/middleware');
 
-const mongoose = require('mongoose');
-mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log('MongoDB connected'))
-  .catch(err => console.log(err));
-  
 
 const app = express();
 
 app.use(express.json());
 app.use(middleware.authMiddleware);
+app.use('/uploads', express.static('uploads'));
 
 app.use('/api/users', userRoutes);
 app.use('/api/photos', photoRoutes);
 app.use('/api/messages', messageRoutes);
+app.use('/api/search', searchRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
