@@ -9,6 +9,7 @@ CREATE TABLE photos_v2 (
   id INT AUTO_INCREMENT PRIMARY KEY,
   user_id INT DEFAULT NULL,
   photo_path VARCHAR(255) NOT NULL,
+  thumbnail_path VARCHAR(255),
   caption TEXT,
   status VARCHAR(255) DEFAULT 'pending', -- pending, approved, rejected, deleted
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

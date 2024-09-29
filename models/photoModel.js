@@ -1,8 +1,8 @@
 const db = require("../db");
 
-const uploadPhoto = async (caption, photoPath) => {
-  const sql = `INSERT INTO photos_v2 (caption, photo_path) VALUES (?, ?)`;
-  const [result] = await db.execute(sql, [caption, photoPath]);
+const uploadPhoto = async (caption, photoPath, thumbnailPath, userId) => {
+  const sql = `INSERT INTO photos_v2 (caption, photo_path, thumbnail_path, user_id) VALUES (?, ?, ?, ?)`;
+  const [result] = await db.execute(sql, [caption, photoPath, thumbnailPath, userId]);
   return result;
 };
 

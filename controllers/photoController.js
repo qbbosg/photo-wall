@@ -1,11 +1,23 @@
 const Photo = require('../models/photoModel');
-const upload = require('../utils/upload');
+const { upload } = require('../utils/upload');
+const path = require('path');
+const fs = require('fs');
+const { generateThumbnail } = require('../utils/thumbnail');
 const { getPage, getPageData, successResponse, errorResponse } = require('../utils/page');
 exports.upload = async (req, res) => {
   try {
+    const file = req.file;
+    const userId = req.user ? req.user.id : null;
     const { caption } = req.body;
-    const photoPath = req.file.path;
-    await Photo.uploadPhoto(caption, photoPath);
+    const photoPath = file.path;
+    const thumbnailFolderPath = 'uploads/thumbnail';
+    if (!fs.existsSync(thumbnailFolderPath)) {
+      fs.mkdirSync(thumbnailFolderPath);
+    }
+    const thumbnailPath = `${thumbnailFolderPath}/${file.filename}`;
+    await generateThumbnail(photoPath, thumbnailPath);
+
+    await Photo.uploadPhoto(caption, photoPath, thumbnailPath, userId);
     successResponse(res, 201, null, 'Photo uploaded successfully');
   } catch (error) {
     errorResponse(res, 500, error.message, 'Failed to upload photo');
