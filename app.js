@@ -2,48 +2,31 @@ const express = require('express');
 const cors = require('cors');
 const http = require('http');
 const { Server } = require('socket.io');
-
-const userRoutes = require('./routes/userRoutes');
-const photoRoutes = require('./routes/photoRoutes');
-const messageRoutes = require('./routes/messageRoutes');
-const searchRoutes = require('./routes/searchRoutes');
-const middleware = require('./utils/middleware');
-
+const config = require('./config');
+const middleware = require('./middleware');
+const routes = require('./routes');
+const socketHandler = require('./socketHandler');
 
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: { origin: "*" }
+});
 
 app.use(cors());
-
-const server = http.createServer(app);
-const io =new Server(server, {
-  cors: { origin: "*" }
-})
-app.use(express.static('public'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(middleware.authMiddleware);
+app.use(middleware.uploadMiddleware.single('file'));
+app.use(express.static('public'));
 app.use('/uploads', express.static('uploads'));
 
-app.use('/api/v2/users', userRoutes);
-app.use('/api/v2/photos', photoRoutes);
-app.use('/api/v2/messages', messageRoutes);
-app.use('/api/v2/search', searchRoutes);
+// 使用路由
+app.use('/api/v2', routes);
 
-io.on('connection', (socket) => {
-  console.log('New client connected');
+// 设置 Socket.IO
+socketHandler(io);
 
-  // 接收来自客户端的消息
-  socket.on('updateMessage', (msg) => {
-    // 可以将消息广播给所有客户端
-    io.emit('updateMessage', 'server:' + msg);
-  });
-
-  // 断开连接时的处理
-  socket.on('disconnect', () => {
-    console.log('Client disconnected');
-  });
-});
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+server.listen(config.PORT, () => {
+  console.log(`服务器运行在端口 ${config.PORT}`);
 });
